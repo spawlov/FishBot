@@ -19,7 +19,9 @@ from shop.elasticpath import (
     get_image,
     add_to_cart,
     get_cart,
-    delete_from_cart, check_customer, create_customer,
+    delete_from_cart,
+    check_customer,
+    create_customer,
 )
 
 
@@ -166,10 +168,16 @@ def handler_email(update, context):
             lastname = user.last_name if user.last_name else ''
             name = f'{firstname} {lastname}'.strip()
             _, user_email = query.data.split()
-            if not check_customer(context.bot_data['base_url'], shop_token, name, user_email):
-                create_customer(context.bot_data['base_url'], shop_token, name, user_email)
+            if not check_customer(
+                    context.bot_data['base_url'], shop_token, name, user_email
+            ):
+                create_customer(
+                    context.bot_data['base_url'], shop_token, name, user_email
+                )
             query.message.reply_text(
-                f'{name}, спасибо за заказ. В ближайшее время с Вами свяжуться для завершения его оформления.'
+                f'{name}, спасибо за заказ. '
+                f'В ближайшее время с Вами свяжуться '
+                f'для завершения его оформления.'
             )
             query.message.delete()
             return 'WAITING_EMAIL'
@@ -294,11 +302,11 @@ def tg_bot(token, base_url, client_id, client_secret, db):
     dispatcher.bot_data['client_secret'] = client_secret
     dispatcher.bot_data['db'] = db
     dispatcher.add_handler(CallbackQueryHandler(handler_user_reply))
-    dispatcher.add_handler(MessageHandler(Filters.regex(r'/start'), handler_user_reply))
+    dispatcher.add_handler(
+        MessageHandler(Filters.regex(r'/start'), handler_user_reply)
+    )
     dispatcher.add_handler(MessageHandler(Filters.text, handler_email))
     dispatcher.add_handler(CommandHandler('start', start))
-
-    # logger.warning('Quiz telegram bot is running!')
 
     bot.start_polling()
     bot.idle()
