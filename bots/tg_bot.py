@@ -19,7 +19,7 @@ from shop.elasticpath import (
     get_image,
     add_to_cart,
     get_cart,
-    delete_from_cart,
+    delete_from_cart, check_customer, create_customer,
 )
 
 
@@ -149,6 +149,11 @@ def handler_cart(update, context):
 
 
 def handler_email(update, context):
+    shop_token = get_shop_token(
+        context.bot_data['base_url'],
+        context.bot_data['client_id'],
+        context.bot_data['client_secret']
+    )
     query = update.callback_query
     if query:
         if query.data == 'BACK_TO_MENU':
@@ -156,8 +161,17 @@ def handler_email(update, context):
             return 'HANDLE_DESCRIPTION'
 
         if query.data[:3] == 'YES':
+            user = update.effective_user
+            firstname = user.first_name if user.first_name else ''
+            lastname = user.last_name if user.last_name else ''
+            name = f'{firstname} {lastname}'.strip()
             _, user_email = query.data.split()
-            print(user_email)
+            if not check_customer(context.bot_data['base_url'], shop_token, name, user_email):
+                create_customer(context.bot_data['base_url'], shop_token, name, user_email)
+            query.message.reply_text(
+                f'{name}, спасибо за заказ. В ближайшее время с Вами свяжуться для завершения его оформления.'
+            )
+            query.message.delete()
             return 'WAITING_EMAIL'
 
     chat_id = update.message.chat_id

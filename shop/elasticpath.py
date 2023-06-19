@@ -106,7 +106,34 @@ def get_cart(base_url, token, customer_id):
 
 def delete_from_cart(base_url, token, customer_id, product_id):
     headers = {'Authorization': f'Bearer {token}'}
-    cart_url = f'{base_url}/v2/carts/{customer_id}/items/{product_id}'
-    response = requests.delete(cart_url, headers=headers)
+    url = f'{base_url}/v2/carts/{customer_id}/items/{product_id}'
+    response = requests.delete(url, headers=headers)
     response.raise_for_status()
     return response.status_code
+
+
+def check_customer(base_url, token, name, email):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = f'{base_url}/v2/customers'
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    customers = response.json()['data']
+    for customer in customers:
+        return customer['id'] if all([name == customer['name'], email == customer['email']]) else None
+
+
+def create_customer(base_url, token, name, email):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = f'{base_url}/v2/customers'
+    data = {
+        'data': {
+            'type': 'customer',
+            'name': name,
+            'email': email,
+            'password': '',
+        },
+    }
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()['data']
+
