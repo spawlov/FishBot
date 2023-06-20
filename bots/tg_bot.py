@@ -1,6 +1,8 @@
+import logging
 import os
 import re
 
+import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Updater,
@@ -10,6 +12,7 @@ from telegram.ext import (
     Filters,
 )
 
+from bots.tg_logger import TelegramLogsHandler
 from shop.elasticpath import (
     get_shop_token,
     get_products,
@@ -23,6 +26,12 @@ from shop.elasticpath import (
     check_customer,
     create_customer,
 )
+
+logger = logging.getLogger(__file__)
+
+
+def error_handler(_, context):
+    logger.error(f'FishBot error: ', exc_info=context.error)
 
 
 def start(update, context):
@@ -294,7 +303,12 @@ def handler_user_reply(update, context):
     db.set(str(f'Chat::{chat_id}'), next_state)
 
 
-def tg_bot(token, base_url, client_id, client_secret, db):
+def tg_bot(token, base_url, client_id, client_secret, db, log_token, dev_chat):
+    logger_bot = telegram.Bot(token=log_token)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(
+        TelegramLogsHandler(logger_bot, dev_chat)
+    )
     bot = Updater(token)
     dispatcher = bot.dispatcher
     dispatcher.bot_data['base_url'] = base_url
@@ -307,6 +321,7 @@ def tg_bot(token, base_url, client_id, client_secret, db):
     )
     dispatcher.add_handler(MessageHandler(Filters.text, handler_email))
     dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_error_handler(error_handler)
 
     bot.start_polling()
     bot.idle()

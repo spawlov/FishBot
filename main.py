@@ -16,7 +16,15 @@ def main():
     redis_port = os.getenv('REDIS_PORT')
     db = get_database_connection(redis_host, redis_port, redis_password)
 
-    tg_bot(os.getenv('SHOP_BOT'), base_url, client_id, client_secret, db)
+    tg_bot(
+        os.getenv('SHOP_BOT'),
+        base_url,
+        client_id,
+        client_secret,
+        db,
+        os.getenv('LOGGER_BOT_TOKEN'),
+        os.getenv('LOGGER_CHAT_ID'),
+    )
 
 
 if __name__ == '__main__':
