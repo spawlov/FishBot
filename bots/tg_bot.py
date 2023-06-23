@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import textwrap
 
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -52,9 +53,11 @@ def start(update, context):
     firstname = user.first_name if user.first_name else ''
     lastname = user.last_name if user.last_name else ''
     update.message.reply_text(
-        f'Здравствуйте, {firstname} {lastname}\n'
-        f'Добро пожаловать в рыбный магазин!\n'
-        f'Выберите, пожалуйста, что Вас интересует:',
+        text=textwrap.dedent(
+            f'''Здравствуйте, {firstname} {lastname}
+            Добро пожаловать в рыбный магазин! 
+            Выберите, пожалуйста, что Вас интересует:'''
+        ),
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
     update.message.delete()
@@ -128,10 +131,12 @@ def handler_cart(update, context):
     keyboard = []
     cart_image = 'cart_.jpg' if items else 'cart.jpeg'
     for item in items:
-        text += f'{item["name"]}\n{item["description"]}\n' \
-                f'${item["unit_price"]["amount"] / 100} per kg\n' \
-                f'{item["quantity"]}kg in cart for ' \
-                f'${item["value"]["amount"] / 100}\n\n'
+        text += f'''
+        {item["name"]}
+        {item["description"]}
+        ${item["unit_price"]["amount"] / 100} per kg
+        {item["quantity"]}kg in cart for ${item["value"]["amount"] / 100}
+        '''
         keyboard.append(
             [
                 InlineKeyboardButton(
@@ -148,13 +153,12 @@ def handler_cart(update, context):
     keyboard.append(
         [InlineKeyboardButton('В меню', callback_data='BACK_TO_MENU')]
     )
-    query.message.reply_photo(
-        photo=open(os.path.normpath(
-            f'{os.getcwd()}/assets/{cart_image}'
-        ), 'rb'),
-        caption=text,
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    with open(os.path.normpath(f'{os.getcwd()}/assets/{cart_image}')) as photo:
+        query.message.reply_photo(
+            photo=photo,
+            caption=textwrap.dedent(text),
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
     query.message.delete()
     return 'HANDLE_CART'
 
@@ -209,8 +213,7 @@ def handler_email(update, context):
             ]
         ]
         update.message.reply_text(
-            f'{firstname} {lastname}\n'
-            f'{update.message.text} - это Ваш Email?',
+            f'{firstname} {lastname}, {update.message.text} - это Ваш Email?',
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
         update.message.delete()
@@ -253,10 +256,15 @@ def handler_description(update, context):
     stock = get_stock(context.bot_data['base_url'], shop_token, query.data)
     image_id = product['relationships']['main_image']['data']['id']
     image_url = get_image(context.bot_data['base_url'], shop_token, image_id)
-    text = f'{product["attributes"]["name"]}\n\n' \
-           f'${price / 100} per kg.\n' \
-           f'{stock}kg on stock\n\n' \
-           f'{product["attributes"].get("description")}'
+    text = textwrap.dedent(
+        f'''
+        {product["attributes"]["name"]}
+        
+        ${price / 100} per kg.
+        {stock}kg on stock
+        
+        {product["attributes"].get("description")}'''
+    )
     keyboard = [
         [InlineKeyboardButton('1кг', callback_data=f'CART 1 {query.data}'),
          InlineKeyboardButton('5кг', callback_data=f'CART 5 {query.data}'),
@@ -303,7 +311,7 @@ def handler_user_reply(update, context):
     db.set(str(f'Chat::{chat_id}'), next_state)
 
 
-def tg_bot(token, base_url, client_id, client_secret, db, log_token, dev_chat):
+def telegram_bot(token, base_url, client_id, client_secret, db, log_token, dev_chat):
     logger_bot = telegram.Bot(token=log_token)
     logger.setLevel(logging.INFO)
     logger.addHandler(
