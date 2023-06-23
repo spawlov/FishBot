@@ -131,12 +131,14 @@ def handler_cart(update, context):
     keyboard = []
     cart_image = 'cart_.jpg' if items else 'cart.jpeg'
     for item in items:
-        text += f'''
-        {item["name"]}
-        {item["description"]}
-        ${item["unit_price"]["amount"] / 100} per kg
-        {item["quantity"]}kg in cart for ${item["value"]["amount"] / 100}
-        '''
+        text += textwrap.dedent(
+            f'''
+            {item["name"]}
+            {item["description"]}
+            ${item["unit_price"]["amount"] / 100} per kg
+            {item["quantity"]}kg in cart for ${item["value"]["amount"] / 100}
+            '''
+        )
         keyboard.append(
             [
                 InlineKeyboardButton(
