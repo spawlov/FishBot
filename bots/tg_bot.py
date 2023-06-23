@@ -195,7 +195,7 @@ def handler_email(update, context):
             query.message.reply_text(
                 text=textwrap.dedent(
                     f'''{name}, спасибо за заказ.
-                    В ближайшее время с Вами свяжуться 
+                    В ближайшее время с Вами свяжутся 
                     для завершения его оформления.'''
                 )
             )
