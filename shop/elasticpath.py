@@ -119,9 +119,9 @@ def check_customer(base_url, token, name, email):
     response.raise_for_status()
     customers = response.json()['data']
     for customer in customers:
-        return customer['id'] if all(
-            [name == customer['name'], email == customer['email']]
-        ) else None
+        if all([name == customer['name'], email == customer['email']]):
+            return customer['id']
+    return None
 
 
 def create_customer(base_url, token, name, email):
