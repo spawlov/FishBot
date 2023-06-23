@@ -153,12 +153,16 @@ def handler_cart(update, context):
     keyboard.append(
         [InlineKeyboardButton('В меню', callback_data='BACK_TO_MENU')]
     )
-    with open(os.path.normpath(f'{os.getcwd()}/assets/{cart_image}')) as photo:
-        query.message.reply_photo(
-            photo=photo,
-            caption=textwrap.dedent(text),
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+    with open(
+            os.path.normpath(f'{os.getcwd()}/assets/{cart_image}'),
+            'rb'
+    ) as file:
+        photo = file.read()
+    query.message.reply_photo(
+        photo=photo,
+        caption=textwrap.dedent(text),
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
     query.message.delete()
     return 'HANDLE_CART'
 
