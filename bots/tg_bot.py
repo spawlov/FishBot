@@ -188,9 +188,11 @@ def handler_email(update, context):
                     context.bot_data['base_url'], shop_token, name, user_email
                 )
             query.message.reply_text(
-                f'{name}, спасибо за заказ. '
-                f'В ближайшее время с Вами свяжуться '
-                f'для завершения его оформления.'
+                text=textwrap.dedent(
+                    f'''{name}, спасибо за заказ.
+                    В ближайшее время с Вами свяжуться 
+                    для завершения его оформления.'''
+                )
             )
             query.message.delete()
             return 'WAITING_EMAIL'
