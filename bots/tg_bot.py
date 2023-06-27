@@ -319,7 +319,7 @@ def handler_user_reply(update, context):
     db.set(str(f'Chat::{chat_id}'), next_state)
 
 
-def telegram_bot(token, base_url, client_id, client_secret, db, log_token, dev_chat):
+def run_bot(token, base_url, client_id, client_secret, db, log_token, dev_chat):
     logger_bot = telegram.Bot(token=log_token)
     logger.setLevel(logging.INFO)
     logger.addHandler(
